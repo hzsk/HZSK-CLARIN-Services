@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>converters</groupId>
+  <groupId>de.uni_hamburg.converters</groupId>
   <artifactId>HZSK-CLARIN-Services-mvn</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>HZSK-CLARIN-Services-mvn</name>
-  <url>http://maven.apache.org</url>
+  <url>http://corpora.uni-hamburg.de</url>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -25,10 +25,11 @@
       <artifactId>jdom</artifactId>
       <version>1.1</version>
     </dependency>
+    <!-- http://www.mkyong.com/maven/how-to-include-library-manully-into-maven-local-repository/ -->
     <dependency>
-      <groupId>exmaralda</groupId>
+      <groupId>org.exmaralda</groupId>
       <artifactId>exmaralda</artifactId>
-      <version>1.0</version>
+      <version>1.10</version>
   </dependency>
   </dependencies>
   <build>
