@@ -5,33 +5,25 @@
  */
 package converters;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.POST;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import org.exmaralda.common.corpusbuild.TEIMerger;
 import org.exmaralda.common.jdomutilities.IOUtilities;
 import org.exmaralda.exakt.utilities.FileIO;
@@ -39,6 +31,7 @@ import org.exmaralda.partitureditor.jexmaralda.BasicTranscription;
 import org.exmaralda.partitureditor.jexmaralda.SegmentedTranscription;
 import org.exmaralda.partitureditor.jexmaralda.convert.CHATConverter;
 import org.exmaralda.partitureditor.jexmaralda.convert.StylesheetFactory;
+import org.exmaralda.partitureditor.jexmaralda.convert.TEITCFMerger;
 import org.exmaralda.partitureditor.jexmaralda.convert.TranscriberConverter;
 import org.exmaralda.partitureditor.jexmaralda.segment.AbstractSegmentation;
 import org.exmaralda.partitureditor.jexmaralda.segment.CHATSegmentation;
@@ -51,6 +44,7 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.transform.XSLTransformException;
 import org.jdom.xpath.XPath;
+import org.xml.sax.SAXException;
 
 /**
  * REST Web Service
@@ -70,13 +64,24 @@ public class IsoTeiConverter {
     }
 
     /***********************************************************************/
-    /************************     EXMARaLDA       **************************/
+    /****************     EXMARaLDA(EXB) ==> ISO/TEI       *****************/
     /***********************************************************************/
 
-    public String exb2isoTei(InputStream sourceData, String segmentationAlgorithm
+    /**
+     * Retrieves representation of an instance of converters.IsoTeiConverter
+     * @param sourceData
+     * @param segmentationAlgorithm
+     * @param language
+     * @return an HTTP response with content of the updated or created resource.
+     */
+    @POST
+    @Path("/exb2isoTeiConverter")
+    @Consumes("application/xml;format-variant=exmaralda-exb")
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    public Response exb2isoTei(InputStream sourceData, 
+            @QueryParam("seg") String segmentationAlgorithm,
+            @QueryParam("lang") String language
     ) {
-        String result = "";
-        
         try{
             //read exb from input stream
             Scanner s = new Scanner(sourceData).useDelimiter("\\A");
@@ -84,34 +89,14 @@ public class IsoTeiConverter {
             BasicTranscription exb = new BasicTranscription();
             exb.BasicTranscriptionFromString(inputXml);
             
-            Document teiDoc = segment(exb, segmentationAlgorithm);
+            Document teiDoc = segment(exb, segmentationAlgorithm, language);
 
             // generate IDs for all elements in the TEI document
             generateWordIDs(teiDoc);
 
-            result = IOUtilities.documentToString(teiDoc);
-        } catch (Exception e){
-            e.printStackTrace();       
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Retrieves representation of an instance of converters.IsoTeiConverter
-     * @param sourceData
-     * @param segmentationAlgorithm
-     * @return an instance of java.lang.String
-     */
-    @POST
-    @Path("/exb2isoTeiConverter")
-    @Consumes("text/x-exmaralda-exb+xml")
-    @Produces("text/x-iso-tei-spoken+xml")    
-    public Response exb2isoTeiPost(InputStream sourceData, 
-            @QueryParam("seg") String segmentationAlgorithm
-    ) {
-        try{
-            String isoTeiResultString = this.exb2isoTei(sourceData, segmentationAlgorithm);
+            String isoTeiResultString = IOUtilities.documentToString(teiDoc);
+
+
             return Response.ok(isoTeiResultString).build();
         } catch (Exception e){
             throw new WebApplicationException(e, Response
@@ -119,32 +104,8 @@ public class IsoTeiConverter {
         }
     }
     
-    
-    /**
-     * Retrieves representation of an instance of converters.IsoTeiConverter
-     * @param sourceData
-     * @param segmentationAlgorithm
-     * @return an instance of java.lang.String
-     */
-    @POST
-    @Path("/exb2isoTeiConverter/{segAlgorithm}")
-    @Consumes("text/x-exmaralda-exb+xml")
-    @Produces("text/x-iso-tei-spoken+xml")    
-    public Response exb2isoTeiPath(InputStream sourceData, 
-            @PathParam("segAlgorithm") String segmentationAlgorithm
-    ) {
-        try{
-            String isoTeiResultString = this.exb2isoTei(sourceData, segmentationAlgorithm);
-            return Response.ok(isoTeiResultString).build();
-        } catch (Exception e){
-            throw new WebApplicationException(e, Response
-                    .status(400).entity(e.getStackTrace()).build());             
-        }
-    }
-    
-       
     /***********************************************************************/
-    /************************     FOLKER          **************************/
+    /************************ FOLKER ==> ISO/TEI ***************************/
     /***********************************************************************/
 
     static String FOLKER2ISOTEI_XSL = "/org/exmaralda/tei/xml/folker2isotei.xsl";
@@ -152,13 +113,16 @@ public class IsoTeiConverter {
     /**
      * Retrieves representation of an instance of converters.IsoTeiConverter
      * @param sourceData
-     * @return an instance of java.lang.String
+     * @param language
+     * @return an HTTP response with content of the updated or created resource.
      */
     @POST
     @Path("/fln2isoTeiConverter")
-    @Consumes("text/x-exmaralda-fln+xml")
-    @Produces("text/x-iso-tei-spoken+xml")    
-    public Response fln2isoTei(InputStream sourceData) {
+    @Consumes("application/xml;format-variant=folker-fln")
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    public Response fln2isoTei(
+            InputStream sourceData,
+            @QueryParam("lang") String language) {
         try{
             //read fln from input stream
             Scanner s = new Scanner(sourceData).useDelimiter("\\A");
@@ -166,8 +130,12 @@ public class IsoTeiConverter {
             
             // initiate an XSL engine capable of XSL 2
             StylesheetFactory sf = new StylesheetFactory(true);
+            // Define parameters for the stylesheet transformation
+            String[][] parameters = {
+                {"LANGUAGE", language}
+            };
             // do the stylesheet transformation
-            String firstResult = sf.applyInternalStylesheetToString(FOLKER2ISOTEI_XSL, inputXml);
+            String firstResult = sf.applyInternalStylesheetToString(FOLKER2ISOTEI_XSL, inputXml, parameters);
             
             Document teiDoc = IOUtilities.readDocumentFromString(firstResult);
             // generate IDs for all elements in the TEI document
@@ -182,21 +150,23 @@ public class IsoTeiConverter {
     }
     
     /***********************************************************************/
-    /************************     Transcriber     **************************/
+    /****************     Transcriber ==> ISO/TEI    ***********************/
     /***********************************************************************/
 
     /**
      * Retrieves representation of an instance of converters.IsoTeiConverter
      * @param sourceData
      * @param segmentationAlgorithm
-     * @return an instance of java.lang.String
+     * @param language
+     * @return an HTTP response with content of the updated or created resource.
      */
     @POST
     @Path("/transcriber2isoTeiConverter")
-    @Consumes("text/x-transcriber-trs+xml")
-    @Produces("text/x-iso-tei-spoken+xml")    
+    @Consumes("application/xml;format-variant=transcriber-trs")
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
     public Response transcriber2isoTei(InputStream sourceData, 
-            @QueryParam("seg") String segmentationAlgorithm
+            @QueryParam("seg") String segmentationAlgorithm,
+            @QueryParam("lang") String language
     ) {
         try{
             //read trs from input stream
@@ -213,7 +183,7 @@ public class IsoTeiConverter {
             TranscriberConverter transcriberConverter = new TranscriberConverter();
             BasicTranscription exb = transcriberConverter.readTranscriberFromFile(tempFile.getAbsolutePath());
             
-            Document teiDoc = segment(exb, segmentationAlgorithm);
+            Document teiDoc = segment(exb, segmentationAlgorithm, language);
 
             // generate IDs for all elements in the TEI document
             generateWordIDs(teiDoc);
@@ -228,21 +198,23 @@ public class IsoTeiConverter {
     }
     
     /***********************************************************************/
-    /************************     CHAT            **************************/
+    /************************    CHAT ==> ISO/TEI     **********************/
     /***********************************************************************/
 
     /**
      * Retrieves representation of an instance of converters.IsoTeiConverter
      * @param sourceData
      * @param segmentationAlgorithm
-     * @return an instance of java.lang.String
+     * @param language
+     * @return an HTTP response with content of the updated or created resource.
      */
     @POST
     @Path("/chat2isoTeiConverter")
-    @Consumes("text/x-cha+txt")     // oder gibt es schon einen MIME-Type fï¿½r CHAT-Daten?
-    @Produces("text/x-iso-tei-spoken+xml")    
+    @Consumes("application/x-cha+txt")     // oder gibt es schon einen MIME-Type für CHAT-Daten?
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
     public Response chat2isoTei(InputStream sourceData, 
-            @QueryParam("seg") String segmentationAlgorithm
+            @QueryParam("seg") String segmentationAlgorithm,
+            @QueryParam("lang") String language            
     ) {
         try{
             //read cha from input stream
@@ -262,7 +234,7 @@ public class IsoTeiConverter {
             CHATConverter chatConverter = new CHATConverter(tempFile);
             BasicTranscription exb = chatConverter.convert();
             
-            Document teiDoc = segment(exb, segmentationAlgorithm);
+            Document teiDoc = segment(exb, segmentationAlgorithm, language);
 
             // generate IDs for all elements in the TEI document
             generateWordIDs(teiDoc);
@@ -276,10 +248,77 @@ public class IsoTeiConverter {
         }
     }
 
+    /***********************************************************************/
+    /************************    ISO/TEI ==> TCF      **********************/
+    /***********************************************************************/
+    
+    static String ISOTEI2TCF_XSL = "/org/exmaralda/partitureditor/jexmaralda/xsl/ISOTEI2TCF.xsl";
+
+    /**
+     * Retrieves representation of an instance of converters.IsoTeiConverter
+     * @param sourceData
+     * @return an HTTP response with content of the updated or created resource.
+     */
+    @POST
+    @Path("/isoTei2TcfConverter")
+    @Consumes("application/tei+xml;format-variant=tei-iso-spoken")
+    @Produces("application/xml;format-variant=weblicht-tcf")    
+    public Response isoTei2Tcf(InputStream sourceData) {
+        try{
+            //read ISO/TEI from input stream
+            Scanner s = new Scanner(sourceData).useDelimiter("\\A");
+            String inputXml = s.hasNext() ? s.next() : "";   
+            // initiate an XSL engine capable of XSL 2
+            StylesheetFactory sf = new StylesheetFactory(true);
+            // do the stylesheet transformation
+            String tcfResultString = sf.applyInternalStylesheetToString(ISOTEI2TCF_XSL, inputXml);            
+            return Response.ok(tcfResultString).build();
+        } catch (SAXException | ParserConfigurationException | IOException | TransformerException e){
+            throw new WebApplicationException(e, Response
+                    .status(400).entity(e.getStackTrace()).build());             
+        }
+    }
+
+    /***********************************************************************/
+    /************************    ISO/TEI ==> TCF      **********************/
+    /***********************************************************************/
+    
+
+    /**
+     * Retrieves representation of an instance of converters.IsoTeiConverter
+     * @param sourceData
+     * @return an HTTP response with content of the updated or created resource.
+     */
+    @POST
+    @Path("/tcf2isoTeiConverter")
+    @Consumes("application/xml;format-variant=weblicht-tcf")    
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken")
+    public Response tcf2isoTei(InputStream sourceData) {
+        try{
+            //read TCF from input stream
+            Scanner s = new Scanner(sourceData).useDelimiter("\\A");
+            String inputXml = s.hasNext() ? s.next() : "";   
+            // write a temp file
+            File tcfResultFile = File.createTempFile("TCF", ".tcf");
+            tcfResultFile.deleteOnExit();
+            FileIO.writeDocumentToLocalFile(tcfResultFile, IOUtilities.readDocumentFromString(inputXml));
+            
+            // merge TCF into original TEI (included in textSource) 
+            TEITCFMerger merger = new TEITCFMerger(tcfResultFile);            
+            merger.merge();            
+            Document mergedDocument = merger.getMergedDocument();
+            
+            String isoTeiResultString = IOUtilities.documentToString(mergedDocument);
+            return Response.ok(isoTeiResultString).build();
+        } catch (IOException | JDOMException e){
+            throw new WebApplicationException(e, Response
+                    .status(400).entity(e.getStackTrace()).build());             
+        } 
+    }
+    
     /**
      * PUT method for updating or creating an instance of IsoTeiConverter
      * @param content representation for the resource
-     * @return an HTTP response with content of the updated or created resource.
      */
     @PUT
     @Consumes("application/xml")
@@ -343,7 +382,7 @@ public class IsoTeiConverter {
         }
     }
 
-    private Document segment(BasicTranscription exb, String segmentationAlgorithm) throws XSLTransformException, JDOMException, IOException, Exception {
+    private Document segment(BasicTranscription exb, String segmentationAlgorithm, String language) throws XSLTransformException, JDOMException, IOException, Exception {
         // pick the right segmentation algorithm 
         // according to the parameter "seg" passed to the service
         AbstractSegmentation segmentation = new GenericSegmentation();
@@ -369,6 +408,14 @@ public class IsoTeiConverter {
         TEIMerger teiMerger = new TEIMerger(true);
         Document stdoc = FileIO.readDocumentFromString(st.toXML());
         Document teiDoc = teiMerger.SegmentedTranscriptionToTEITranscription(stdoc, nameOfDeepSegmentation, "SpeakerContribution_Event", true);
+
+        // added 08-07-2016: need to set the language in the TEI document
+        XPath textXPath = XPath.newInstance("//tei:text[1]"); 
+        textXPath.addNamespace("tei", "http://www.tei-c.org/ns/1.0");
+        textXPath.addNamespace(Namespace.XML_NAMESPACE);        
+        Element textElement = (Element)(textXPath.selectSingleNode(teiDoc));
+        textElement.setAttribute("xml:lang", language);
+                
         return teiDoc;
     }
     
