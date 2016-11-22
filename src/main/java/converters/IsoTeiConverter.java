@@ -31,7 +31,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import static javax.ws.rs.core.HttpHeaders.USER_AGENT;
 import javax.ws.rs.core.Response;
 import org.exmaralda.common.corpusbuild.TEIMerger;
 import org.exmaralda.common.jdomutilities.IOUtilities;
