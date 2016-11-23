@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
@@ -28,6 +30,7 @@ import org.exmaralda.common.corpusbuild.TEIMerger;
 import org.exmaralda.common.jdomutilities.IOUtilities;
 import org.exmaralda.exakt.utilities.FileIO;
 import org.exmaralda.partitureditor.jexmaralda.BasicTranscription;
+import org.exmaralda.partitureditor.jexmaralda.JexmaraldaException;
 import org.exmaralda.partitureditor.jexmaralda.SegmentedTranscription;
 import org.exmaralda.partitureditor.jexmaralda.convert.CHATConverter;
 import org.exmaralda.partitureditor.jexmaralda.convert.StylesheetFactory;
@@ -82,7 +85,8 @@ public class IsoTeiConverter {
             @QueryParam("seg") String segmentationAlgorithm,
             @QueryParam("lang") String language
     ) {
-        try{
+        try {
+            System.out.println("##### EXB2TEI: Method entered");
             //read exb from input stream
             Scanner s = new Scanner(sourceData).useDelimiter("\\A");
             String inputXml = s.hasNext() ? s.next() : "";                    
@@ -95,10 +99,21 @@ public class IsoTeiConverter {
             generateWordIDs(teiDoc);
 
             String isoTeiResultString = IOUtilities.documentToString(teiDoc);
+            
+            System.out.println("##### EXB2TEI: Result string was generated");
 
-
-            return Response.ok(isoTeiResultString).build();
-        } catch (Exception e){
+            Response buildResponse = Response.ok(isoTeiResultString).build();
+            return buildResponse;
+        } catch (SAXException e) {
+            throw new WebApplicationException(e, Response
+                    .status(400).entity(e.getStackTrace()).build());             
+        } catch (JexmaraldaException e) {
+            throw new WebApplicationException(e, Response
+                    .status(400).entity(e.getStackTrace()).build());             
+        } catch (IOException e) {
+            throw new WebApplicationException(e, Response
+                    .status(400).entity(e.getStackTrace()).build());             
+        } catch (Exception e) {
             throw new WebApplicationException(e, Response
                     .status(400).entity(e.getStackTrace()).build());             
         }
@@ -142,8 +157,9 @@ public class IsoTeiConverter {
             generateWordIDs(teiDoc);
 
             String isoTeiResultString = IOUtilities.documentToString(teiDoc);
+            System.out.println("##### FLN2TEI: Result string was generated");
             return Response.ok(isoTeiResultString).build();
-        } catch (Exception e){
+        } catch (SAXException | ParserConfigurationException | IOException | TransformerException | JDOMException e){
             throw new WebApplicationException(e, Response
                     .status(400).entity(e.getStackTrace()).build());             
         }
@@ -414,7 +430,8 @@ public class IsoTeiConverter {
         textXPath.addNamespace("tei", "http://www.tei-c.org/ns/1.0");
         textXPath.addNamespace(Namespace.XML_NAMESPACE);        
         Element textElement = (Element)(textXPath.selectSingleNode(teiDoc));
-        textElement.setAttribute("xml:lang", language);
+        //textElement.setAttribute("xml:lang", language);
+        textElement.setAttribute("lang", language, Namespace.XML_NAMESPACE);
                 
         return teiDoc;
     }
