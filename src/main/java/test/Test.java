@@ -5,6 +5,7 @@
  */
 package test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +13,7 @@ import org.exmaralda.common.corpusbuild.TEIMerger;
 import org.exmaralda.exakt.utilities.FileIO;
 import org.exmaralda.partitureditor.jexmaralda.BasicTranscription;
 import org.exmaralda.partitureditor.jexmaralda.SegmentedTranscription;
+import org.exmaralda.partitureditor.jexmaralda.convert.TEITCFMerger;
 import org.exmaralda.partitureditor.jexmaralda.segment.AbstractSegmentation;
 import org.exmaralda.partitureditor.jexmaralda.segment.CHATSegmentation;
 import org.exmaralda.partitureditor.jexmaralda.segment.GenericSegmentation;
@@ -43,7 +45,15 @@ public class Test {
 
     private void doit() throws Exception {
         BasicTranscription exb = new BasicTranscription();
-        segment(exb, "HIAT", "DE");
+        //segment(exb, "HIAT", "DE");
+        tcfMerge();
+    }
+    
+    private void tcfMerge() throws JDOMException, IOException{
+        TEITCFMerger merger = new TEITCFMerger(new File("F:\\Dropbox\\EXMARaLDA_Build\\WEB-SERVICE-TEST\\TCF.xml"));            
+        merger.merge();            
+        Document mergedDocument = merger.getMergedDocument();
+        
     }
     
     private Document segment(BasicTranscription exb, String segmentationAlgorithm, String language) throws XSLTransformException, JDOMException, IOException, Exception {

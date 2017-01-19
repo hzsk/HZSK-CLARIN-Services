@@ -2,11 +2,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.uni_hamburg.converters</groupId>
-  <artifactId>HZSK-CLARIN-Services-mvn</artifactId>
+  <!-- CHANGE ME! -->
+  <artifactId>HZSK-CLARIN-Services</artifactId>
   <packaging>war</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>HZSK-CLARIN-Services-mvn</name>
+  <!-- CHANGE ME! -->
+  <version>0.9</version>
+  <!-- <name>HZSK-CLARIN-Services-mvn</name> -->
+  <name>HZSK-CLARIN-Services</name>
   <url>http://corpora.uni-hamburg.de</url>
+  
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -44,12 +49,45 @@
         <version>1.1.6</version>
     </dependency>
     
+    <dependency>
+       <groupId>javax.servlet</groupId>
+       <artifactId>servlet-api</artifactId>
+       <version>2.5</version>
+       <scope>provided</scope>
+     </dependency>
+     <dependency>
+       <groupId>javax.servlet.jsp</groupId>
+       <artifactId>jsp-api</artifactId>
+       <version>2.1</version>
+       <scope>provided</scope>
+     </dependency>
+     <dependency>
+       <groupId>javax.servlet</groupId>
+       <artifactId>jstl</artifactId>
+       <scope>runtime</scope>
+       <version>1.2</version>
+     </dependency>
+
   </dependencies>
+  
+  <!-- CHANGE ME! -->
   <build>
-    <finalName>HZSK-CLARIN-Services-mvn</finalName>
+    <finalName>HZSK-CLARIN-Services-0.9</finalName>
   </build>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+  
+  <!-- <build>
+    <finalName>HZSK-CLARIN-Services</finalName>
+    <plugins>
+        <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>2.3</version>
+        </plugin>          
+    </plugins>
+  </build> -->
+               
+  <!-- CHANGE ME! -->
+  <properties>
+      <maven.compiler.source>1.7</maven.compiler.source>
+      <maven.compiler.target>1.7</maven.compiler.target>       
+  </properties> 
 </project>
