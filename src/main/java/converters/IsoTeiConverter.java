@@ -224,7 +224,7 @@ public class IsoTeiConverter {
      */
     @POST
     @Path("/chat2isoTeiConverter")
-    @Consumes("application/x-cha+txt")     // oder gibt es schon einen MIME-Type für CHAT-Daten?
+    @Consumes("text/plain;format-variant=clan-cha")     
     @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
     public Response chat2isoTei(InputStream sourceData, 
             @QueryParam("seg") String segmentationAlgorithm,
