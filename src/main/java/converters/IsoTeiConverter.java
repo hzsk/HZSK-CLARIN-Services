@@ -78,7 +78,7 @@ public class IsoTeiConverter {
     @POST
     @Path("/exb2isoTeiConverter")
     @Consumes("application/xml;format-variant=exmaralda-exb")
-    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")    
     public Response exb2isoTei(InputStream sourceData, 
             @QueryParam("seg") String segmentationAlgorithm,
             @QueryParam("lang") String language
@@ -132,7 +132,7 @@ public class IsoTeiConverter {
     @POST
     @Path("/fln2isoTeiConverter")
     @Consumes("application/xml;format-variant=folker-fln")
-    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")    
     public Response fln2isoTei(
             InputStream sourceData,
             @QueryParam("lang") String language) {
@@ -177,7 +177,7 @@ public class IsoTeiConverter {
     @POST
     @Path("/transcriber2isoTeiConverter")
     @Consumes("application/xml;format-variant=transcriber-trs")
-    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")    
     public Response transcriber2isoTei(InputStream sourceData, 
             @QueryParam("seg") String segmentationAlgorithm,
             @QueryParam("lang") String language
@@ -225,7 +225,7 @@ public class IsoTeiConverter {
     @POST
     @Path("/chat2isoTeiConverter")
     @Consumes("text/plain;format-variant=clan-cha")     
-    @Produces("application/tei+xml;format-variant=tei-iso-spoken")    
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")    
     public Response chat2isoTei(InputStream sourceData, 
             @QueryParam("seg") String segmentationAlgorithm,
             @QueryParam("lang") String language            
@@ -275,8 +275,9 @@ public class IsoTeiConverter {
      */
     @POST
     @Path("/isoTei2TcfConverter")
-    @Consumes("application/tei+xml;format-variant=tei-iso-spoken")
-    @Produces("application/xml;format-variant=weblicht-tcf")    
+    @Consumes("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")
+    @Produces("text/tcf+xml")
+    /* @Produces("application/xml;format-variant=weblicht-tcf")    */
     public Response isoTei2Tcf(InputStream sourceData) {
         try{
             //read ISO/TEI from input stream
@@ -305,8 +306,9 @@ public class IsoTeiConverter {
      */
     @POST
     @Path("/tcf2isoTeiConverter")
-    @Consumes("application/xml;format-variant=weblicht-tcf")    
-    @Produces("application/tei+xml;format-variant=tei-iso-spoken")
+    @Consumes("text/tcf+xml")    
+    /* @Consumes("application/xml;format-variant=weblicht-tcf")    */
+    @Produces("application/tei+xml;format-variant=tei-iso-spoken;tokenized=1")
     public Response tcf2isoTei(InputStream sourceData) {
         try{
             //read TCF from input stream
