@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package converters;
+package de.uni_hamburg.converters;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +15,7 @@ import java.util.Scanner;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.POST;
@@ -62,6 +63,13 @@ public class IsoTeiConverter {
      * Creates a new instance of IsoTeiConverter
      */
     public IsoTeiConverter() {
+    }
+
+    @GET
+    @Path("/foo")
+    public Response foo() {
+        System.out.println("DEBUG: GETted foo ");
+        return Response.ok("FOO").build();
     }
 
     /***********************************************************************/

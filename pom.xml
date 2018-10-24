@@ -10,8 +10,8 @@
   <!-- <name>HZSK-CLARIN-Services-mvn</name> -->
   <name>HZSK-CLARIN-Services</name>
   <url>http://corpora.uni-hamburg.de</url>
-  
-  
+
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -41,14 +41,14 @@
         <groupId>net.sf.saxon</groupId>
         <artifactId>Saxon-HE</artifactId>
         <version>9.4</version>
-    </dependency>    
+    </dependency>
     <!-- https://mvnrepository.com/artifact/jaxen/jaxen -->
     <dependency>
         <groupId>jaxen</groupId>
         <artifactId>jaxen</artifactId>
         <version>1.1.6</version>
     </dependency>
-    
+
     <dependency>
        <groupId>javax.servlet</groupId>
        <artifactId>servlet-api</artifactId>
@@ -68,26 +68,30 @@
        <version>1.2</version>
      </dependency>
 
-  </dependencies>
-  
+    <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+    </dependencies>
+
   <!-- CHANGE ME! -->
   <build>
     <finalName>HZSK-CLARIN-Services-0.9</finalName>
-  </build>
-  
-  <!-- <build>
-    <finalName>HZSK-CLARIN-Services</finalName>
     <plugins>
         <plugin>
             <artifactId>maven-war-plugin</artifactId>
             <version>2.3</version>
-        </plugin>          
+        </plugin>
     </plugins>
-  </build> -->
-               
+  </build>
+
+
   <!-- CHANGE ME! -->
   <properties>
       <maven.compiler.source>1.7</maven.compiler.source>
-      <maven.compiler.target>1.7</maven.compiler.target>       
-  </properties> 
+      <maven.compiler.target>1.7</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
 </project>
