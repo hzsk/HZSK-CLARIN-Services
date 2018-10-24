@@ -34,7 +34,7 @@
     <dependency>
       <groupId>org.exmaralda</groupId>
       <artifactId>exmaralda</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
     <dependency>
@@ -68,11 +68,13 @@
        <version>1.2</version>
      </dependency>
 
-    <dependency>
+     <!--
+     <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <version>2.0.1</version>
         </dependency>
+    -->
     </dependencies>
 
   <!-- CHANGE ME! -->
@@ -89,9 +91,9 @@
 
   <!-- CHANGE ME! -->
   <properties>
-      <maven.compiler.source>1.7</maven.compiler.source>
-      <maven.compiler.target>1.7</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 </project>
