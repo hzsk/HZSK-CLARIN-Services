@@ -6,7 +6,7 @@
   <artifactId>HZSK-CLARIN-Services</artifactId>
   <packaging>war</packaging>
   <!-- CHANGE ME! -->
-  <version>0.9</version>
+  <version>0.9.1</version>
   <!-- <name>HZSK-CLARIN-Services-mvn</name> -->
   <name>HZSK-CLARIN-Services</name>
   <url>http://corpora.uni-hamburg.de</url>
@@ -79,7 +79,7 @@
 
   <!-- CHANGE ME! -->
   <build>
-    <finalName>HZSK-CLARIN-Services-0.9</finalName>
+    <finalName>HZSK-CLARIN-Services-0.9.1</finalName>
     <plugins>
         <plugin>
             <artifactId>maven-war-plugin</artifactId>
